@@ -1,6 +1,7 @@
 #include "CCommandI.h"
 #include <cerrno>
 #include <cstring>
+#include <unistd.h>
 
 CCommandPipeDest::
 CCommandPipeDest(CCommand *command) :

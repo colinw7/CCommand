@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cerrno>
 #include <cstring>
+#include <unistd.h>
 
 // Note: pipe source owns the pipe used by piep source and destination
 

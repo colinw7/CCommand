@@ -3,6 +3,7 @@
 #include <cerrno>
 #include <cstring>
 #include <fcntl.h>
+#include <unistd.h>
 
 CCommandFileSrc::
 CCommandFileSrc(CCommand *command, const string &file) :

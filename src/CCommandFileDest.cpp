@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cerrno>
 #include <fcntl.h>
+#include <unistd.h>
 
 CCommandFileDest::
 CCommandFileDest(CCommand *command, const string &file, int dest_fd) :
