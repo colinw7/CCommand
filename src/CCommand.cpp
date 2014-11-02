@@ -1,4 +1,4 @@
-#include "CCommandI.h"
+#include <CCommandI.h>
 #include <COSProcess.h>
 #include <COSSignal.h>
 #include <COSTerm.h>
