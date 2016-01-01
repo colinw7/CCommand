@@ -1,4 +1,7 @@
-#include <CCommandI.h>
+#include <CCommandPipeDest.h>
+#include <CCommandPipeSrc.h>
+#include <CCommandPipe.h>
+#include <CCommand.h>
 #include <cerrno>
 #include <cstring>
 #include <unistd.h>
@@ -68,11 +71,11 @@ initChild()
     // redirect pipe output to destination files (stdout and/or stderr)
     for (uint i = 0; i < dest_fds_.size(); ++i) {
       int error = ::close(dest_fds_[i]);
-      if (error < 0) throwError(string("close: ") + strerror(errno));
+      if (error < 0) throwError(std::string("close: ") + strerror(errno));
 
       if (pipe_->getOutput() != dest_fds_[i]) {
         error = ::dup2(pipe_->getOutput(), dest_fds_[i]);
-        if (error < 0) throwError(string("dup2: ") + strerror(errno));
+        if (error < 0) throwError(std::string("dup2: ") + strerror(errno));
       }
       else
         close_output = false;
@@ -80,20 +83,20 @@ initChild()
 
     // close pipe input (not needed after fork)
     int error = pipe_->closeInput();
-    if (error < 0) throwError(string("close: ") + strerror(errno));
+    if (error < 0) throwError(std::string("close: ") + strerror(errno));
   }
   else {
     // save command destination files (stdout and/or stderr) and
     // redirect pipe output to destination files (stdout and/or stderr)
     for (uint i = 0; i < dest_fds_.size(); ++i) {
       int save_fd = ::dup(dest_fds_[i]);
-      if (save_fd < 0) throwError(string("dup: ") + strerror(errno));
+      if (save_fd < 0) throwError(std::string("dup: ") + strerror(errno));
 
       save_fds_.push_back(save_fd);
 
       if (pipe_->getOutput() != dest_fds_[i]) {
         int error = ::dup2(pipe_->getOutput(), dest_fds_[i]);
-        if (error < 0) throwError(string("dup2: ") + strerror(errno));
+        if (error < 0) throwError(std::string("dup2: ") + strerror(errno));
       }
       else
         close_output = false;
@@ -105,7 +108,7 @@ initChild()
   // close pipe output (already redirected)
   if (close_output) {
     int error = pipe_->closeOutput();
-    if (error < 0) throwError(string("close: ") + strerror(errno));
+    if (error < 0) throwError(std::string("close: ") + strerror(errno));
   }
 }
 
@@ -117,12 +120,12 @@ term()
     if (command_->getDoFork()) {
       // close pipe input (not needed after fork)
       int error = pipe_->closeInput();
-      if (error < 0) throwError(string("close: ") + strerror(errno));
+      if (error < 0) throwError(std::string("close: ") + strerror(errno));
     }
 
     // close pipe output (already redirected)
     int error = pipe_->closeOutput();
-    if (error < 0) throwError(string("close: ") + strerror(errno));
+    if (error < 0) throwError(std::string("close: ") + strerror(errno));
   }
 
   // restore redirected destination files (stdout and/or stderr)

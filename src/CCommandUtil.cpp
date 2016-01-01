@@ -1,6 +1,7 @@
-#include <CCommandI.h>
+#include <CCommandUtil.h>
 #include <cstdio>
 #include <cstring>
+#include <cstdarg>
 
 void
 CCommandUtil::

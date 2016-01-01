@@ -1,138 +1,28 @@
-#include <CCommandI.h>
+#include <CCommand.h>
+#include <CCommandMgr.h>
+#include <CCommandFileSrc.h>
+#include <CCommandFileDest.h>
+#include <CCommandPipeSrc.h>
+#include <CCommandPipeDest.h>
+#include <CCommandStringSrc.h>
+#include <CCommandStringDest.h>
+#include <CCommandPipe.h>
+#include <CCommandUtil.h>
 #include <COSProcess.h>
 #include <COSSignal.h>
 #include <COSTerm.h>
+#include <CFuncs.h>
+
+#include <algorithm>
 #include <cerrno>
 #include <cassert>
 #include <cstring>
-#include <algorithm>
 #include <fcntl.h>
-
-CCommandMgr::
-CCommandMgr() :
- command_map_ (),
- pipe_dest_   (NULL),
- last_error_  (""),
- last_id_     (0),
- throwOnError_(false),
- debug_       (false)
-{
-}
-
-void
-CCommandMgr::
-addCommand(CCommand *command)
-{
-  command->setId(++last_id_);
-
-  command_map_[last_id_] = command;
-}
-
-void
-CCommandMgr::
-deleteCommand(CCommand *command)
-{
-  command_map_.erase(command->getId());
-}
-
-CCommand *
-CCommandMgr::
-getCommand(uint id) const
-{
-  CommandMap::const_iterator p = command_map_.find(id);
-
-  if (p == command_map_.end()) return NULL;
-
-  return (*p).second;
-}
-
-bool
-CCommandMgr::
-execCommand(const string &cmd)
-{
-  vector<string> words;
-
-  CStrUtil::addWords(cmd, words);
-
-  if (words.size() == 0)
-    return false;
-
-  string cmd1 = words[0];
-
-  words.erase(words.begin());
-
-  CCommand command(cmd1, cmd1, words);
-
-  command.start();
-
-  return true;
-}
-
-CCommand *
-CCommandMgr::
-lookup(pid_t pid)
-{
-  CommandMap::iterator p1, p2;
-
-  for (p1 = commandsBegin(), p2 = commandsEnd(); p1 != p2; ++p1) {
-    CCommand *command = (*p1).second;
-
-    if (command->getPid() == pid)
-      return command;
-  }
-
-  return NULL;
-}
-
-list<CCommand *>
-CCommandMgr::
-getCommands()
-{
-  list<CCommand *> command_list;
-
-  CCommandMgr::CommandMap::iterator p1, p2;
-
-  for (p1 = CCommandMgrInst->commandsBegin(), p2 = CCommandMgrInst->commandsEnd(); p1 != p2; ++p1) {
-    CCommand *command = (*p1).second;
-
-    command_list.push_back(command);
-  }
-
-  return command_list;
-}
-
-list<CCommand *>
-CCommandMgr::
-getCommands(CCommand::State state)
-{
-  list<CCommand *> command_list;
-
-  CCommandMgr::CommandMap::iterator p1, p2;
-
-  for (p1 = CCommandMgrInst->commandsBegin(), p2 = CCommandMgrInst->commandsEnd(); p1 != p2; ++p1) {
-    CCommand *command = (*p1).second;
-
-    if (command->isState(state))
-      command_list.push_back(command);
-  }
-
-  return command_list;
-}
-
-void
-CCommandMgr::
-throwError(const string &msg)
-{
-  last_error_ = msg;
-
-  if (throwOnError_)
-    CTHROW(msg);
-}
-
-//---------
+#include <sys/types.h>
+#include <sys/wait.h>
 
 CCommand::
-CCommand(const string &cmdStr, bool do_fork) :
+CCommand(const std::string &cmdStr, bool do_fork) :
  name_         (cmdStr),
  path_         (""),
  do_fork_      (do_fork),
@@ -150,13 +40,14 @@ CCommand(const string &cmdStr, bool do_fork) :
  src_list_     (),
  dest_list_    ()
 {
-  vector<string> args;
+  std::vector<std::string> args;
 
   init(args);
 }
 
 CCommand::
-CCommand(const string &name, const string &path, const vector<string> &args, bool do_fork) :
+CCommand(const std::string &name, const std::string &path,
+         const std::vector<std::string> &args, bool do_fork) :
  name_         (name),
  path_         (path),
  do_fork_      (do_fork),
@@ -178,8 +69,8 @@ CCommand(const string &name, const string &path, const vector<string> &args, boo
 }
 
 CCommand::
-CCommand(const string &name, CallbackProc proc, CallbackData data,
-         const vector<string> &args, bool do_fork) :
+CCommand(const std::string &name, CallbackProc proc, CallbackData data,
+         const std::vector<std::string> &args, bool do_fork) :
  name_         (name),
  path_         (""),
  do_fork_      (do_fork),
@@ -213,7 +104,7 @@ CCommand::
 
 void
 CCommand::
-init(const vector<string> &args)
+init(const std::vector<std::string> &args)
 {
   StringVectorT::const_iterator p1, p2;
 
@@ -223,11 +114,11 @@ init(const vector<string> &args)
   CCommandMgrInst->addCommand(this);
 }
 
-string
+std::string
 CCommand::
 getCommandString() const
 {
-  string str = name_;
+  std::string str = name_;
 
   uint num_args = args_.size();
 
@@ -239,7 +130,7 @@ getCommandString() const
 
 void
 CCommand::
-addFileSrc(const string &filename)
+addFileSrc(const std::string &filename)
 {
   CCommandFileSrc *src = new CCommandFileSrc(this, filename);
 
@@ -278,7 +169,7 @@ addPipeSrc()
 
 void
 CCommand::
-addStringSrc(const string &str)
+addStringSrc(const std::string &str)
 {
   CCommandStringSrc *src = new CCommandStringSrc(this, str);
 
@@ -287,7 +178,7 @@ addStringSrc(const string &str)
 
 void
 CCommand::
-addFileDest(const string &filename, int fd)
+addFileDest(const std::string &filename, int fd)
 {
   CCommandFileDest *dest = new CCommandFileDest(this, filename, fd);
 
@@ -322,7 +213,7 @@ addPipeDest(int fd)
 
 void
 CCommand::
-addStringDest(string &str, int fd)
+addStringDest(std::string &str, int fd)
 {
   CCommandStringDest *dest = new CCommandStringDest(this, str, fd);
 
@@ -371,7 +262,7 @@ start()
     pid_ = fork();
 
     if      (pid_ < 0) {
-      throwError(string("fork: ") + strerror(errno));
+      throwError(std::string("fork: ") + strerror(errno));
       return;
     }
     // child
@@ -454,7 +345,7 @@ pause()
     int error_code = COSSignal::sendSignal(pid_, SIGSTOP);
 
     if (error_code < 0) {
-      throwError(string("kill: ") + strerror(errno) + ".");
+      throwError(std::string("kill: ") + strerror(errno) + ".");
       return;
     }
   }
@@ -468,7 +359,7 @@ resume()
     int error_code = COSSignal::sendSignal(pid_, SIGCONT);
 
     if (error_code < 0) {
-      throwError(string("kill: ") + strerror(errno) + ".");
+      throwError(std::string("kill: ") + strerror(errno) + ".");
       return;
     }
 
@@ -484,7 +375,7 @@ stop()
     int error_code = COSSignal::sendSignal(pid_, SIGTERM);
 
     if (error_code < 0) {
-      throwError(string("kill: ") + strerror(errno) + ".");
+      throwError(std::string("kill: ") + strerror(errno) + ".");
       return;
     }
   }
@@ -498,7 +389,7 @@ tstop()
     int error_code = COSSignal::sendSignal(pid_, SIGTSTP);
 
     if (error_code < 0) {
-      throwError(string("kill: ") + strerror(errno) + ".");
+      throwError(std::string("kill: ") + strerror(errno) + ".");
       return;
     }
   }
@@ -778,7 +669,7 @@ run()
   int error = execvp(args[0], args);
 
   if (error != 0) {
-    throwError(string("execvp: ") + args[0] + " " + strerror(errno));
+    throwError(std::string("execvp: ") + args[0] + " " + strerror(errno));
     return;
   }
 
@@ -891,7 +782,7 @@ setForegroundProcessGroup()
   static bool  initialized = false;
 
   if (! initialized) {
-    string tty = COSTerm::getTerminalName();
+    std::string tty = COSTerm::getTerminalName();
 
     pgrp = COSTerm::getTerminalProcessGroupId(tty);
 
@@ -970,7 +861,7 @@ setState(State state)
 
 void
 CCommand::
-throwError(const string &msg)
+throwError(const std::string &msg)
 {
   CCommandMgrInst->throwError(msg);
 }

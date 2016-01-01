@@ -1,5 +1,5 @@
-#include <CCommandI.h>
-#include <cstdio>
+#include <CCommandSrc.h>
+#include <CCommand.h>
 
 CCommandSrc::
 CCommandSrc(CCommand *command) :

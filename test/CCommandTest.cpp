@@ -2,9 +2,6 @@
 #include <CFile.h>
 #include <CStrUtil.h>
 #include <CReadLine.h>
-#include <cstdio>
-#include <cstdlib>
-#include <vector>
 #include <iostream>
 
 #define NONE     0
@@ -19,7 +16,7 @@
 struct Command {
   std::string              name;
   std::vector<std::string> args;
-  int                 type;
+  int                      type;
 };
 
 typedef std::vector<std::string>::iterator pstring;

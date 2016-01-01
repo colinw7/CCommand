@@ -1,4 +1,6 @@
-#include <CCommandI.h>
+#include <CCommandFileDest.h>
+#include <CCommand.h>
+#include <CFile.h>
 #include <cstdio>
 #include <cstring>
 #include <cerrno>
@@ -6,10 +8,10 @@
 #include <unistd.h>
 
 CCommandFileDest::
-CCommandFileDest(CCommand *command, const string &file, int dest_fd) :
+CCommandFileDest(CCommand *command, const std::string &file, int dest_fd) :
  CCommandDest(command), dest_fd_(dest_fd)
 {
-  file_ = new string(file);
+  file_ = new std::string(file);
 
   overwrite_ = true;
   append_    = false;
@@ -55,7 +57,7 @@ initParent()
     }
 
     if (fd_ < 0)
-      throwError(string("creat: ") + *file_ + " " + strerror(errno));
+      throwError(std::string("creat: ") + *file_ + " " + strerror(errno));
   }
 }
 
@@ -67,17 +69,17 @@ initChild()
     int error = close(dest_fd_);
 
     if (error < 0)
-      throwError(string("close: ") + strerror(errno));
+      throwError(std::string("close: ") + strerror(errno));
 
     error = dup2(fd_, dest_fd_);
 
     if (error < 0)
-      throwError(string("dup2: ") + strerror(errno));
+      throwError(std::string("dup2: ") + strerror(errno));
 
     error = close(fd_);
 
     if (error < 0)
-      throwError(string("close: ") + strerror(errno));
+      throwError(std::string("close: ") + strerror(errno));
 
     fd_ = -1;
   }
@@ -85,17 +87,17 @@ initChild()
     save_fd_ = dup(dest_fd_);
 
     if (save_fd_ < 0)
-      throwError(string("dup: ") + strerror(errno));
+      throwError(std::string("dup: ") + strerror(errno));
 
     int error = dup2(fd_, dest_fd_);
 
     if (error < 0)
-      throwError(string("dup2: ") + strerror(errno));
+      throwError(std::string("dup2: ") + strerror(errno));
 
     error = close(fd_);
 
     if (error < 0)
-      throwError(string("close: ") + strerror(errno));
+      throwError(std::string("close: ") + strerror(errno));
 
     fd_ = -1;
   }
@@ -109,7 +111,7 @@ term()
     int error = close(fd_);
 
     if (error < 0)
-      throwError(string("close: ") + strerror(errno));
+      throwError(std::string("close: ") + strerror(errno));
 
     fd_ = -1;
   }

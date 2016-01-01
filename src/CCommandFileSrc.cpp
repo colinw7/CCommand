@@ -1,4 +1,5 @@
-#include <CCommandI.h>
+#include <CCommandFileSrc.h>
+#include <CCommand.h>
 #include <cstdio>
 #include <cerrno>
 #include <cstring>
@@ -6,10 +7,10 @@
 #include <unistd.h>
 
 CCommandFileSrc::
-CCommandFileSrc(CCommand *command, const string &file) :
+CCommandFileSrc(CCommand *command, const std::string &file) :
  CCommandSrc(command)
 {
-  file_ = new string(file);
+  file_ = new std::string(file);
 }
 
 CCommandFileSrc::
@@ -35,7 +36,7 @@ initParent()
     fd_ = open(file_->c_str(), O_RDONLY);
 
     if (fd_ < 0)
-      throwError(string("open: ") + *file_ + " " + strerror(errno));
+      throwError(std::string("open: ") + *file_ + " " + strerror(errno));
   }
 }
 
@@ -47,28 +48,28 @@ initChild()
     int error = close(0);
 
     if (error < 0)
-      throwError(string("close: ") + strerror(errno));
+      throwError(std::string("close: ") + strerror(errno));
 
     error = dup2(fd_, 0);
 
     if (error < 0)
-      throwError(string("dup2: ") + strerror(errno));
+      throwError(std::string("dup2: ") + strerror(errno));
 
     error = close(fd_);
 
     if (error < 0)
-      throwError(string("close: ") + strerror(errno));
+      throwError(std::string("close: ") + strerror(errno));
   }
   else {
     save_stdin_ = dup(0);
 
     if (save_stdin_ < 0)
-      throwError(string("dup: ") + strerror(errno));
+      throwError(std::string("dup: ") + strerror(errno));
 
     int error = dup2(fd_, 0);
 
     if (error < 0)
-      throwError(string("dup2: ") + strerror(errno));
+      throwError(std::string("dup2: ") + strerror(errno));
   }
 }
 
@@ -80,7 +81,7 @@ term()
     int error = close(fd_);
 
     if (error < 0)
-      throwError(string("close: ") + strerror(errno));
+      throwError(std::string("close: ") + strerror(errno));
 
     fd_ = -1;
   }

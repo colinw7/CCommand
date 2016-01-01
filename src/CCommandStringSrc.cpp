@@ -1,10 +1,11 @@
-#include <CCommandI.h>
+#include <CCommandStringSrc.h>
+#include <CCommandPipe.h>
 #include <cerrno>
 #include <cstring>
 #include <unistd.h>
 
 CCommandStringSrc::
-CCommandStringSrc(CCommand *command, const string &str) :
+CCommandStringSrc(CCommand *command, const std::string &str) :
  CCommandSrc(command), str_(str)
 {
   pipe_ = NULL;
@@ -27,17 +28,17 @@ initParent()
   save_stdin_ = dup(0);
 
   if (save_stdin_ < 0)
-    throwError(string("dup: ") + strerror(errno));
+    throwError(std::string("dup: ") + strerror(errno));
 
   int error = close(0);
 
   if (error < 0)
-    throwError(string("close: ") + strerror(errno));
+    throwError(std::string("close: ") + strerror(errno));
 
   error = dup2(pipe_->getInput(), 0);
 
   if (error < 0)
-    throwError(string("dup2: ") + strerror(errno));
+    throwError(std::string("dup2: ") + strerror(errno));
 }
 
 void
@@ -67,7 +68,7 @@ process()
   int error = pipe_->closeInput();
 
   if (error < 0)
-    throwError(string("close: ") + strerror(errno));
+    throwError(std::string("close: ") + strerror(errno));
 
   int fd = pipe_->getOutput();
 
@@ -75,11 +76,11 @@ process()
     int num_written = write(pipe_->getOutput(), str_.c_str(), str_.size());
 
     if (num_written != (int) str_.size())
-      throwError(string("write: ") + strerror(errno));
+      throwError(std::string("write: ") + strerror(errno));
 
     int error = pipe_->closeOutput();
 
     if (error < 0)
-      throwError(string("close: ") + strerror(errno));
+      throwError(std::string("close: ") + strerror(errno));
   }
 }

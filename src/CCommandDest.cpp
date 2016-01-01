@@ -1,5 +1,5 @@
-#include <CCommandI.h>
-#include <cstdio>
+#include <CCommandDest.h>
+#include <CCommand.h>
 
 CCommandDest::
 CCommandDest(CCommand *command) :

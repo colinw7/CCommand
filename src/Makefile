@@ -12,6 +12,7 @@ LIB_DIR = ../lib
 all: $(LIB_DIR)/libCCommand.a
 
 SRC = \
+CCommandMgr.cpp \
 CCommand.cpp \
 CCommandDest.cpp \
 CCommandFileDest.cpp \

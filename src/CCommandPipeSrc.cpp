@@ -1,4 +1,7 @@
-#include <CCommandI.h>
+#include <CCommandPipeSrc.h>
+#include <CCommandPipeDest.h>
+#include <CCommandPipe.h>
+#include <CCommand.h>
 #include <cassert>
 #include <cerrno>
 #include <cstring>
@@ -62,35 +65,35 @@ initChild()
   if (command_->getDoFork()) {
     // close stdin
     int error = ::close(0);
-    if (error < 0) throwError(string("close: ") + strerror(errno));
+    if (error < 0) throwError(std::string("close: ") + strerror(errno));
 
     if (pipe_->getInput() != 0) {
       // redirect pipe input to stdin
       error = ::dup2(pipe_->getInput(), 0);
-      if (error < 0) throwError(string("dup2: ") + strerror(errno));
+      if (error < 0) throwError(std::string("dup2: ") + strerror(errno));
 
       // close pipe input
       error = pipe_->closeInput();
-      if (error < 0) throwError(string("close: ") + strerror(errno));
+      if (error < 0) throwError(std::string("close: ") + strerror(errno));
     }
 
     // close pipe output (not needed)
     error = pipe_->closeOutput();
-    if (error < 0) throwError(string("close: ") + strerror(errno));
+    if (error < 0) throwError(std::string("close: ") + strerror(errno));
   }
   else {
     // save orginal stdin
     save_stdin_ = dup(0);
-    if (save_stdin_ < 0) throwError(string("dup: ") + strerror(errno));
+    if (save_stdin_ < 0) throwError(std::string("dup: ") + strerror(errno));
 
     if (pipe_->getInput() != 0) {
       // redirect pipe input to stdin
       int error = dup2(pipe_->getInput(), 0);
-      if (error < 0) throwError(string("dup2: ") + strerror(errno));
+      if (error < 0) throwError(std::string("dup2: ") + strerror(errno));
 
       // close pipe input
       error = pipe_->closeInput();
-      if (error < 0) throwError(string("close: ") + strerror(errno));
+      if (error < 0) throwError(std::string("close: ") + strerror(errno));
     }
   }
 }
@@ -102,12 +105,12 @@ term()
   if (pipe_ != NULL) {
     // close pipe input (already redirected)
     int error = pipe_->closeInput();
-    if (error < 0) throwError(string("close: ") + strerror(errno));
+    if (error < 0) throwError(std::string("close: ") + strerror(errno));
 
     if (command_->getDoFork()) {
       // close pipe output (not needed after fork)
       int error = pipe_->closeOutput();
-      if (error < 0) throwError(string("close: ") + strerror(errno));
+      if (error < 0) throwError(std::string("close: ") + strerror(errno));
     }
   }
 

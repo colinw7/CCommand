@@ -1,9 +1,10 @@
-#include <CCommandI.h>
+#include <CCommandPipe.h>
+#include <CCommand.h>
 #include <cerrno>
 #include <cstring>
 #include <unistd.h>
 
-list<CCommandPipe *> CCommandPipe::pipes_;
+std::list<CCommandPipe *> CCommandPipe::pipes_;
 
 CCommandPipe::
 CCommandPipe(CCommand *command) :
@@ -12,7 +13,7 @@ CCommandPipe(CCommand *command) :
   int error = ::pipe(fd_);
 
   if (error < 0)
-    throwError(string("pipe: ") + strerror(errno));
+    throwError(std::string("pipe: ") + strerror(errno));
 
   pipes_.push_back(this);
 }
@@ -23,12 +24,12 @@ CCommandPipe::
   int error = closeInput();
 
   if (error < 0)
-    throwError(string("close: ") + strerror(errno));
+    throwError(std::string("close: ") + strerror(errno));
 
   error = closeOutput();
 
   if (error < 0)
-    throwError(string("close: ") + strerror(errno));
+    throwError(std::string("close: ") + strerror(errno));
 
   pipes_.remove(this);
 }
@@ -65,7 +66,7 @@ void
 CCommandPipe::
 deleteOthers(CCommand *command)
 {
-  list<CCommandPipe *>::iterator ppipe = pipes_.begin();
+  std::list<CCommandPipe *>::iterator ppipe = pipes_.begin();
 
   while (ppipe != pipes_.end()) {
     if ((*ppipe)->src_ != command && (*ppipe)->dest_ != command) {
@@ -80,7 +81,7 @@ deleteOthers(CCommand *command)
 
 void
 CCommandPipe::
-throwError(const string &msg)
+throwError(const std::string &msg)
 {
   command_->throwError(msg);
 }
