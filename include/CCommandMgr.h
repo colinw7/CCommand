@@ -53,11 +53,11 @@ class CCommandMgr : public CSingleton<CCommandMgr> {
 
  private:
   CommandMap        command_map_;
-  CCommandPipeDest *pipe_dest_;
+  CCommandPipeDest *pipe_dest_    { nullptr };
   std::string       last_error_;
-  uint              last_id_;
-  bool              throwOnError_;
-  bool              debug_;
+  uint              last_id_      { 0 };
+  bool              throwOnError_ { false };
+  bool              debug_        { false };
 };
 
 #endif

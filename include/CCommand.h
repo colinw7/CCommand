@@ -23,13 +23,13 @@ class CCommand {
   typedef void  *CallbackData;
   typedef void (*CallbackProc)(const StringVectorT &args, CallbackData data);
 
-  enum State {
-    NO_STATE,
-    IDLE_STATE,
-    RUNNING_STATE,
-    EXITED_STATE,
-    SIGNALLED_STATE,
-    STOPPED_STATE
+  enum class State {
+    NONE,
+    IDLE,
+    RUNNING,
+    EXITED,
+    SIGNALLED,
+    STOPPED
   };
 
  public:
@@ -150,20 +150,20 @@ class CCommand {
  private:
   std::string   name_;
   std::string   path_;
-  uint          id_;
-  bool          do_fork_;
-  CallbackProc  callback_proc_;
-  CallbackData  callback_data_;
+  uint          id_            { 0 };
+  bool          do_fork_       { false };
+  CallbackProc  callback_proc_ { nullptr };
+  CallbackData  callback_data_ { nullptr };
   StringVectorT args_;
-  pid_t         pid_;
-  pid_t         pgid_;
-  bool          group_leader_;
-  uint          group_id_;
-  bool          child_;
+  pid_t         pid_           { 0 };
+  pid_t         pgid_          { 0 };
+  bool          group_leader_  { false };
+  uint          group_id_      { 0 };
+  bool          child_         { false };
 
-  State         state_;
-  int           return_code_;
-  int           signal_num_;
+  State         state_         { State::NONE };
+  int           return_code_   { -1 };
+  int           signal_num_    { -1 };
 
   SrcList       src_list_;
   DestList      dest_list_;

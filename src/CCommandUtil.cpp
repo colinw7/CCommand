@@ -9,10 +9,10 @@ outputMsg(const char *format, ...)
 {
   static FILE *output_fp;
 
-  if (output_fp == NULL)
+  if (! output_fp)
     output_fp = fopen(".msg.txt", "w");
 
-  if (output_fp == NULL)
+  if (! output_fp)
     return;
 
   va_list args;

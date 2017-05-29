@@ -24,9 +24,9 @@ class CCommandDest {
   void throwError(const std::string &msg);
 
  protected:
-  CCommand *command_;
-  int       fd_;
-  int       save_fd_;
+  CCommand *command_ { nullptr };
+  int       fd_      { -1 };
+  int       save_fd_ { -1 };
 };
 
 #endif

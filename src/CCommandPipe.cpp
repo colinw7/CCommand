@@ -8,7 +8,7 @@ std::list<CCommandPipe *> CCommandPipe::pipes_;
 
 CCommandPipe::
 CCommandPipe(CCommand *command) :
- command_(command), src_(NULL), dest_(NULL)
+ command_(command)
 {
   int error = ::pipe(fd_);
 

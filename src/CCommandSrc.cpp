@@ -5,9 +5,6 @@ CCommandSrc::
 CCommandSrc(CCommand *command) :
  command_(command)
 {
-  fd_ = -1;
-
-  save_stdin_ = -1;
 }
 
 CCommandSrc::

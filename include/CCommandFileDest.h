@@ -20,10 +20,10 @@ class CCommandFileDest : public CCommandDest {
   void term();
 
  private:
-  std::string *file_;
-  int          dest_fd_;
-  bool         overwrite_;
-  bool         append_;
+  std::string *file_      { nullptr };
+  int          dest_fd_   { 0 };
+  bool         overwrite_ { true };
+  bool         append_    { false };
 };
 
 #endif

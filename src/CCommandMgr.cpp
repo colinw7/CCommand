@@ -3,13 +3,7 @@
 #include <CThrow.h>
 
 CCommandMgr::
-CCommandMgr() :
- command_map_ (),
- pipe_dest_   (NULL),
- last_error_  (""),
- last_id_     (0),
- throwOnError_(false),
- debug_       (false)
+CCommandMgr()
 {
 }
 
@@ -35,7 +29,8 @@ getCommand(uint id) const
 {
   CommandMap::const_iterator p = command_map_.find(id);
 
-  if (p == command_map_.end()) return NULL;
+  if (p == command_map_.end())
+    return nullptr;
 
   return (*p).second;
 }
@@ -75,7 +70,7 @@ lookup(pid_t pid)
       return command;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 std::list<CCommand *>

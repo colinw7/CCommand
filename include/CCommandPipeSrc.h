@@ -23,8 +23,8 @@ class CCommandPipeSrc : public CCommandSrc {
   CCommandPipe *getPipe() const { return pipe_; }
 
  private:
-  CCommandPipeDest *pipe_dest_;
-  CCommandPipe     *pipe_;
+  CCommandPipeDest *pipe_dest_ { nullptr };
+  CCommandPipe     *pipe_      { nullptr };
 };
 
 #endif

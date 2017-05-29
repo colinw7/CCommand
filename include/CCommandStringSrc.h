@@ -21,7 +21,7 @@ class CCommandStringSrc : public CCommandSrc {
 
  private:
   std::string   str_;
-  CCommandPipe *pipe_;
+  CCommandPipe *pipe_ { nullptr };
 };
 
 #endif

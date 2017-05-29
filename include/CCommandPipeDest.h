@@ -29,8 +29,8 @@ class CCommandPipeDest : public CCommandDest {
   CCommandPipe *getPipe() const { return pipe_; }
 
  private:
-  CCommandPipeSrc *pipe_src_;
-  CCommandPipe    *pipe_;
+  CCommandPipeSrc *pipe_src_ { nullptr };
+  CCommandPipe    *pipe_     { nullptr };
   IntVectorT       dest_fds_;
   IntVectorT       save_fds_;
 };

@@ -29,10 +29,10 @@ class CCommandPipe {
   void throwError(const std::string &msg);
 
  private:
-  CCommand *command_;
+  CCommand *command_ { nullptr };
   int       fd_[2];
-  CCommand *src_;
-  CCommand *dest_;
+  CCommand *src_     { nullptr };
+  CCommand *dest_    { nullptr };
 
   static PipeList pipes_;
 };

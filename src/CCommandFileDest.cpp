@@ -12,19 +12,12 @@ CCommandFileDest(CCommand *command, const std::string &file, int dest_fd) :
  CCommandDest(command), dest_fd_(dest_fd)
 {
   file_ = new std::string(file);
-
-  overwrite_ = true;
-  append_    = false;
 }
 
 CCommandFileDest::
 CCommandFileDest(CCommand *command, FILE *fp, int dest_fd) :
  CCommandDest(command, fp), dest_fd_(dest_fd)
 {
-  file_ = NULL;
-
-  overwrite_ = true;
-  append_    = false;
 }
 
 CCommandFileDest::
@@ -39,7 +32,7 @@ void
 CCommandFileDest::
 initParent()
 {
-  if (file_ != NULL) {
+  if (file_) {
     if (append_) {
       if (! overwrite_ && ! CFile::exists(*file_))
         throwError(*file_ + ": No such file or directory.");

@@ -5,8 +5,6 @@ CCommandDest::
 CCommandDest(CCommand *command) :
  command_(command)
 {
-  fd_      = -1;
-  save_fd_ = -1;
 }
 
 CCommandDest::

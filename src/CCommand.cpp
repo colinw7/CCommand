@@ -23,22 +23,9 @@
 
 CCommand::
 CCommand(const std::string &cmdStr, bool do_fork) :
- name_         (cmdStr),
- path_         (""),
- do_fork_      (do_fork),
- callback_proc_(NULL),
- callback_data_(NULL),
- args_         (),
- pid_          (0),
- pgid_         (0),
- group_leader_ (false),
- group_id_     (0),
- child_        (false),
- state_        (IDLE_STATE),
- return_code_  (-1),
- signal_num_   (-1),
- src_list_     (),
- dest_list_    ()
+ name_   (cmdStr),
+ do_fork_(do_fork),
+ state_  (State::IDLE)
 {
   std::vector<std::string> args;
 
@@ -48,22 +35,10 @@ CCommand(const std::string &cmdStr, bool do_fork) :
 CCommand::
 CCommand(const std::string &name, const std::string &path,
          const std::vector<std::string> &args, bool do_fork) :
- name_         (name),
- path_         (path),
- do_fork_      (do_fork),
- callback_proc_(NULL),
- callback_data_(NULL),
- args_         (),
- pid_          (0),
- pgid_         (0),
- group_leader_ (false),
- group_id_     (0),
- child_        (false),
- state_        (IDLE_STATE),
- return_code_  (-1),
- signal_num_   (-1),
- src_list_     (),
- dest_list_    ()
+ name_   (name),
+ path_   (path),
+ do_fork_(do_fork),
+ state_  (State::IDLE)
 {
   init(args);
 }
@@ -72,21 +47,10 @@ CCommand::
 CCommand(const std::string &name, CallbackProc proc, CallbackData data,
          const std::vector<std::string> &args, bool do_fork) :
  name_         (name),
- path_         (""),
  do_fork_      (do_fork),
  callback_proc_(proc),
  callback_data_(data),
- args_         (),
- pid_          (0),
- pgid_         (0),
- group_leader_ (false),
- group_id_     (0),
- child_        (false),
- state_        (IDLE_STATE),
- return_code_  (-1),
- signal_num_   (-1),
- src_list_     (),
- dest_list_    ()
+ state_        (State::IDLE)
 {
   init(args);
 }
@@ -152,7 +116,7 @@ addPipeSrc()
 {
   CCommandPipeDest *dest = CCommandMgrInst->getPipeDest();
 
-  if (dest == NULL) {
+  if (dest == nullptr) {
     throwError("No Pipe Destination for Source");
     return;
   }
@@ -164,7 +128,7 @@ addPipeSrc()
   src ->setDest(dest);
   dest->setSrc (src);
 
-  CCommandMgrInst->setPipeDest(NULL);
+  CCommandMgrInst->setPipeDest(nullptr);
 }
 
 void
@@ -200,7 +164,7 @@ addPipeDest(int fd)
 {
   CCommandPipeDest *dest = CCommandMgrInst->getPipeDest();
 
-  if (dest == NULL) {
+  if (dest == nullptr) {
     dest = new CCommandPipeDest(this);
 
     dest_list_.push_back(dest);
@@ -229,7 +193,7 @@ setFileDestOverwrite(bool overwrite, int fd)
   for (p1 = dest_list_.begin(), p2 = dest_list_.end(); p1 != p2; ++p1) {
     CCommandFileDest *dest = dynamic_cast<CCommandFileDest *>(*p1);
 
-    if (dest != NULL && dest->getFd() == fd)
+    if (dest != nullptr && dest->getFd() == fd)
       dest->setOverwrite(overwrite);
   }
 }
@@ -243,7 +207,7 @@ setFileDestAppend(bool append, int fd)
   for (p1 = dest_list_.begin(), p2 = dest_list_.end  (); p1 != p2; ++p1) {
     CCommandFileDest *dest = dynamic_cast<CCommandFileDest *>(*p1);
 
-    if (dest != NULL && dest->getFd() == fd)
+    if (dest != nullptr && dest->getFd() == fd)
       dest->setAppend(append);
   }
 }
@@ -280,14 +244,14 @@ start()
       initChildDests();
       initChildSrcs ();
 
-      if (callback_proc_ == NULL)
+      if (callback_proc_ == nullptr)
         run();
       else {
         setReturnCode(0);
 
         callback_proc_(args_, callback_data_);
 
-        setState(EXITED_STATE);
+        setState(State::EXITED);
       }
 
       termSrcs ();
@@ -308,7 +272,7 @@ start()
 
       // setForegroundProcessGroup();
 
-      setState(RUNNING_STATE);
+      setState(State::RUNNING);
 
       processSrcs ();
       processDests();
@@ -325,7 +289,7 @@ start()
 
     callback_proc_(args_, callback_data_);
 
-    setState(EXITED_STATE);
+    setState(State::EXITED);
 
     processDests();
     processSrcs ();
@@ -341,7 +305,7 @@ void
 CCommand::
 pause()
 {
-  if (isState(RUNNING_STATE)) {
+  if (isState(State::RUNNING)) {
     int error_code = COSSignal::sendSignal(pid_, SIGSTOP);
 
     if (error_code < 0) {
@@ -355,7 +319,7 @@ void
 CCommand::
 resume()
 {
-  if (isState(STOPPED_STATE)) {
+  if (isState(State::STOPPED)) {
     int error_code = COSSignal::sendSignal(pid_, SIGCONT);
 
     if (error_code < 0) {
@@ -363,7 +327,7 @@ resume()
       return;
     }
 
-    setState(RUNNING_STATE);
+    setState(State::RUNNING);
   }
 }
 
@@ -371,7 +335,7 @@ void
 CCommand::
 stop()
 {
-  if (isState(RUNNING_STATE) || isState(STOPPED_STATE)) {
+  if (isState(State::RUNNING) || isState(State::STOPPED)) {
     int error_code = COSSignal::sendSignal(pid_, SIGTERM);
 
     if (error_code < 0) {
@@ -385,7 +349,7 @@ void
 CCommand::
 tstop()
 {
-  if (isState(RUNNING_STATE)) {
+  if (isState(State::RUNNING)) {
     int error_code = COSSignal::sendSignal(pid_, SIGTSTP);
 
     if (error_code < 0) {
@@ -400,7 +364,7 @@ CCommand::
 wait()
 {
   if (! do_fork_) {
-    assert(isState(EXITED_STATE));
+    assert(isState(State::EXITED));
   }
   else {
     int fd = open("/dev/tty", O_RDWR);
@@ -415,7 +379,7 @@ wait()
       COSSignal::defaultSignal(SIGTTOU);
     }
 
-    while (! isState(EXITED_STATE) && ! isState(STOPPED_STATE))
+    while (! isState(State::EXITED) && ! isState(State::STOPPED))
       wait_pid(pid_, false);
 
     if (fd != -1 && pgid_ != pgid) {
@@ -435,7 +399,7 @@ void
 CCommand::
 waitpid()
 {
-  while (! isState(EXITED_STATE) && ! isState(STOPPED_STATE))
+  while (! isState(State::EXITED) && ! isState(State::STOPPED))
     wait_pid(pid_, false);
 }
 
@@ -445,7 +409,7 @@ waitpgid()
 {
   assert(pgid_);
 
-  while (! isState(EXITED_STATE) && ! isState(STOPPED_STATE))
+  while (! isState(State::EXITED) && ! isState(State::STOPPED))
     wait_pid(-pgid_, false);
 }
 
@@ -498,7 +462,7 @@ signalChild(int)
   for (p1 = CCommandMgrInst->commandsBegin(), p2 = CCommandMgrInst->commandsEnd(); p1 != p2; ++p1) {
     CCommand *command = (*p1).second;
 
-    if (command->isState(EXITED_STATE))
+    if (command->isState(State::EXITED))
       continue;
 
     wait_pid(command->pid_, true);
@@ -509,7 +473,7 @@ void
 CCommand::
 wait_pid(pid_t pid, bool nohang)
 {
-  CCommand *command = NULL;
+  CCommand *command = nullptr;
 
   if (pid > 0)
     command = CCommandMgrInst->lookup(pid);
@@ -549,7 +513,7 @@ wait_pid(pid_t pid, bool nohang)
     command = CCommandMgrInst->lookup(wait_pid);
 
   if (wait_pid > 0) {
-    if (command == NULL)
+    if (command == nullptr)
       return;
 
     if      (WIFEXITED(status)) {
@@ -560,7 +524,7 @@ wait_pid(pid_t pid, bool nohang)
                                 return_code);
 
       command->setReturnCode(return_code);
-      command->setState     (EXITED_STATE);
+      command->setState     (State::EXITED);
 
       command->termSrcs();
       command->termDests();
@@ -575,7 +539,7 @@ wait_pid(pid_t pid, bool nohang)
                                 COSSignal::strsignal(signal_num).c_str(), signal_num);
 
       command->setSignalNum(signal_num);
-      command->setState    (STOPPED_STATE);
+      command->setState    (State::STOPPED);
     }
     else if (WIFSIGNALED(status)) {
       int signal_num = WTERMSIG(status);
@@ -585,27 +549,27 @@ wait_pid(pid_t pid, bool nohang)
                                 COSSignal::strsignal(signal_num).c_str(), signal_num);
 
       command->setSignalNum(signal_num);
-      command->setState    (SIGNALLED_STATE);
+      command->setState    (State::SIGNALLED);
     }
 #ifdef WIFCONTINUED
     else if (WIFCONTINUED(status)) {
       if (CCommandMgrInst->getDebug())
         CCommandUtil::outputMsg("Process %s Continued\n", command->name_.c_str());
 
-      command->setState(RUNNING_STATE);
+      command->setState(State::RUNNING);
     }
 #endif
   }
   else {
     if (errno == ECHILD) {
-      if (command != NULL) {
+      if (command != nullptr) {
         if (CCommandMgrInst->getDebug())
           CCommandUtil::outputMsg("Process %s Does Not Exist\n", command->name_.c_str());
 
         int return_code = -1;
 
         command->setReturnCode(return_code);
-        command->setState     (EXITED_STATE);
+        command->setState     (State::EXITED);
 
         command->termSrcs();
         command->termDests();
@@ -660,7 +624,7 @@ run()
   for (p1 = args_.begin(), p2 = args_.end(); p1 != p2; ++p1)
     args[i++] = (char *) (*p1).c_str();
 
-  args[i] = NULL;
+  args[i] = nullptr;
 
   // setpgrp();
 

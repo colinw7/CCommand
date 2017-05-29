@@ -13,8 +13,6 @@ CCommandPipeSrc::
 CCommandPipeSrc(CCommand *command) :
  CCommandSrc(command)
 {
-  pipe_dest_ = NULL;
-  pipe_      = NULL;
 }
 
 CCommandPipeSrc::
@@ -22,11 +20,11 @@ CCommandPipeSrc::
 {
   term();
 
-  if (pipe_dest_ != NULL)
-    pipe_dest_->setSrc(NULL);
+  if (pipe_dest_)
+    pipe_dest_->setSrc(nullptr);
 
-  if (pipe_dest_ != NULL)
-    pipe_dest_->setPipe(NULL);
+  if (pipe_dest_)
+    pipe_dest_->setPipe(nullptr);
 
   delete pipe_;
 }
@@ -44,7 +42,7 @@ setPipe(CCommandPipe *pipe)
 {
   pipe_ = pipe;
 
-  if (pipe_ != NULL)
+  if (pipe_)
     pipe_->setSrc(command_);
 }
 
@@ -102,7 +100,7 @@ void
 CCommandPipeSrc::
 term()
 {
-  if (pipe_ != NULL) {
+  if (pipe_) {
     // close pipe input (already redirected)
     int error = pipe_->closeInput();
     if (error < 0) throwError(std::string("close: ") + strerror(errno));

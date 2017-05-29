@@ -8,7 +8,6 @@ CCommandStringSrc::
 CCommandStringSrc(CCommand *command, const std::string &str) :
  CCommandSrc(command), str_(str)
 {
-  pipe_ = NULL;
 }
 
 CCommandStringSrc::

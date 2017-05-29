@@ -10,8 +10,6 @@ CCommandPipeDest::
 CCommandPipeDest(CCommand *command) :
  CCommandDest(command)
 {
-  pipe_src_ = NULL;
-  pipe_     = NULL;
 }
 
 CCommandPipeDest::
@@ -19,8 +17,8 @@ CCommandPipeDest::
 {
   term();
 
-  if (pipe_src_ != NULL)
-    pipe_src_->setDest(NULL);
+  if (pipe_src_)
+    pipe_src_->setDest(nullptr);
 }
 
 void
@@ -36,7 +34,7 @@ setPipe(CCommandPipe *pipe)
 {
   pipe_ = pipe;
 
-  if (pipe_ != NULL)
+  if (pipe_)
     pipe_->setDest(command_);
 }
 
@@ -55,7 +53,7 @@ initParent()
 
   pipe_->setDest(command_);
 
-  if (pipe_src_ != NULL)
+  if (pipe_src_)
     pipe_src_->setPipe(pipe_);
 }
 
@@ -116,7 +114,7 @@ void
 CCommandPipeDest::
 term()
 {
-  if (pipe_ != NULL) {
+  if (pipe_) {
     if (command_->getDoFork()) {
       // close pipe input (not needed after fork)
       int error = pipe_->closeInput();

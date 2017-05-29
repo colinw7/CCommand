@@ -15,7 +15,7 @@ class CCommandFileSrc : public CCommandSrc {
   void term();
 
  private:
-  std::string *file_;
+  std::string *file_ { nullptr };
 };
 
 #endif

@@ -22,9 +22,9 @@ class CCommandStringDest : public CCommandDest {
 
  private:
   std::string  &str_;
-  int           dest_fd_;
-  CCommandPipe *pipe_;
-  int           fd_;
+  int           dest_fd_ { 0 };
+  CCommandPipe *pipe_    { nullptr };
+  int           fd_      { 0 };
   std::string   filename_;
 };
 

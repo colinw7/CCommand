@@ -14,8 +14,6 @@ CCommandStringDest::
 CCommandStringDest(CCommand *command, std::string &str, int dest_fd) :
  CCommandDest(command), str_(str), dest_fd_(dest_fd)
 {
-  pipe_ = NULL;
-  fd_   = 0;
 }
 
 CCommandStringDest::

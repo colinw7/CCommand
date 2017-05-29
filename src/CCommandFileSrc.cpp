@@ -17,7 +17,6 @@ CCommandFileSrc::
 CCommandFileSrc(CCommand *command, FILE *fp) :
  CCommandSrc(command, fp)
 {
-  file_ = NULL;
 }
 
 CCommandFileSrc::
@@ -32,7 +31,7 @@ void
 CCommandFileSrc::
 initParent()
 {
-  if (file_ != NULL) {
+  if (file_) {
     fd_ = open(file_->c_str(), O_RDONLY);
 
     if (fd_ < 0)

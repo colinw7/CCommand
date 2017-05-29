@@ -24,9 +24,9 @@ class CCommandSrc {
   void throwError(const std::string &msg);
 
  protected:
-  CCommand *command_;
-  int      fd_;
-  int      save_stdin_;
+  CCommand *command_    { nullptr };
+  int       fd_         { -1 };
+  int       save_stdin_ { -1 };
 };
 
 #endif
