@@ -28,7 +28,7 @@ CCommandUtil.cpp \
 OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
 CPPFLAGS = \
--std=c++11 \
+-std=c++14 \
 -I. -I$(INC_DIR) \
 -I../../CUtil/include \
 -I../../CFile/include \
