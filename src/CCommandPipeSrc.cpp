@@ -107,8 +107,8 @@ term()
 
     if (command_->getDoFork()) {
       // close pipe output (not needed after fork)
-      int error = pipe_->closeOutput();
-      if (error < 0) throwError(std::string("close: ") + strerror(errno));
+      int error1 = pipe_->closeOutput();
+      if (error1 < 0) throwError(std::string("close: ") + strerror(errno));
     }
   }
 

@@ -77,9 +77,9 @@ process()
     if (num_written != (int) str_.size())
       throwError(std::string("write: ") + strerror(errno));
 
-    int error = pipe_->closeOutput();
+    int error1 = pipe_->closeOutput();
 
-    if (error < 0)
+    if (error1 < 0)
       throwError(std::string("close: ") + strerror(errno));
   }
 }
