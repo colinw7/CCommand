@@ -7,7 +7,7 @@
 #include <list>
 #include <map>
 
-typedef std::vector<std::string> StringVectorT;
+using StringVectorT = std::vector<std::string>;
 
 class CCommand;
 class CCommandPipe;
@@ -17,8 +17,8 @@ class CCommandPipeDest;
 
 class CCommand {
  public:
-  typedef std::list<CCommandSrc *>  SrcList;
-  typedef std::list<CCommandDest *> DestList;
+  using SrcList  = std::list<CCommandSrc *>;
+  using DestList = std::list<CCommandDest *>;
 
   typedef void  *CallbackData;
   typedef void (*CallbackProc)(const StringVectorT &args, CallbackData data);
@@ -66,7 +66,7 @@ class CCommand {
   bool isChild() const { return child_; }
 
   State getState() const { return state_; }
-  bool  isState (State state) const { return (state_ == state); }
+  bool  isState(State state) const { return (state_ == state); }
 
   int getReturnCode() const { return return_code_; }
 
