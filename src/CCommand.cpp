@@ -629,7 +629,6 @@ run()
   // setpgrp();
 
   // TODO: use execve to avoid PATH lookup
-
   int error = execvp(args[0], args);
 
   if (error != 0) {

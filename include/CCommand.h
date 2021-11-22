@@ -19,9 +19,10 @@ class CCommand {
  public:
   using SrcList  = std::list<CCommandSrc *>;
   using DestList = std::list<CCommandDest *>;
+  using Args     = StringVectorT;
 
   typedef void  *CallbackData;
-  typedef void (*CallbackProc)(const StringVectorT &args, CallbackData data);
+  typedef void (*CallbackProc)(const Args &args, CallbackData data);
 
   enum class State {
     NONE,
@@ -36,10 +37,10 @@ class CCommand {
   CCommand(const std::string &cmdStr, bool do_fork=true);
 
   CCommand(const std::string &name, const std::string &path,
-           const StringVectorT &args=StringVectorT(), bool do_fork=true);
+           const Args &args=Args(), bool do_fork=true);
 
   CCommand(const std::string &name, CallbackProc proc, CallbackData data,
-           const StringVectorT &args=StringVectorT(), bool do_fork=false);
+           const Args &args=Args(), bool do_fork=false);
 
   virtual ~CCommand();
 
@@ -55,9 +56,9 @@ class CCommand {
   CallbackProc getCallbackProc() const { return callback_proc_; }
   CallbackData getCallbackData() const { return callback_data_; }
 
-  const StringVectorT &getArgs   ()      const { return args_; }
-  int                  getNumArgs()      const { return args_.size(); }
-  const std::string   &getArg    (int i) const { return args_[i]; }
+  const Args        &getArgs  ()      const { return args_; }
+  int               getNumArgs()      const { return args_.size(); }
+  const std::string &getArg   (int i) const { return args_[i]; }
 
   void addArg(const std::string &arg) { args_.push_back(arg); }
 
@@ -115,7 +116,7 @@ class CCommand {
   virtual void setState(State state);
 
  private:
-  void init(const StringVectorT &args);
+  void init(const Args &args);
 
   void initParentSrcs();
   void initParentDests();
@@ -148,25 +149,25 @@ class CCommand {
   static void wait_pid(pid_t pid, bool nohang);
 
  private:
-  std::string   name_;
-  std::string   path_;
-  uint          id_            { 0 };
-  bool          do_fork_       { false };
-  CallbackProc  callback_proc_ { nullptr };
-  CallbackData  callback_data_ { nullptr };
-  StringVectorT args_;
-  pid_t         pid_           { 0 };
-  pid_t         pgid_          { 0 };
-  bool          group_leader_  { false };
-  uint          group_id_      { 0 };
-  bool          child_         { false };
+  std::string  name_;
+  std::string  path_;
+  uint         id_            { 0 };
+  bool         do_fork_       { false };
+  CallbackProc callback_proc_ { nullptr };
+  CallbackData callback_data_ { nullptr };
+  Args         args_;
+  pid_t        pid_           { 0 };
+  pid_t        pgid_          { 0 };
+  bool         group_leader_  { false };
+  uint         group_id_      { 0 };
+  bool         child_         { false };
 
-  State         state_         { State::NONE };
-  int           return_code_   { -1 };
-  int           signal_num_    { -1 };
+  State        state_         { State::NONE };
+  int          return_code_   { -1 };
+  int          signal_num_    { -1 };
 
-  SrcList       src_list_;
-  DestList      dest_list_;
+  SrcList      src_list_;
+  DestList     dest_list_;
 };
 
 #endif
