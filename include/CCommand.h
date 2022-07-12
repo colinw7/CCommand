@@ -57,8 +57,8 @@ class CCommand {
   CallbackData getCallbackData() const { return callback_data_; }
 
   const Args        &getArgs  ()      const { return args_; }
-  int               getNumArgs()      const { return args_.size(); }
-  const std::string &getArg   (int i) const { return args_[i]; }
+  int               getNumArgs()      const { return int(args_.size()); }
+  const std::string &getArg   (int i) const { assert(i >= 0); return args_[size_t(i)]; }
 
   void addArg(const std::string &arg) { args_.push_back(arg); }
 
