@@ -104,17 +104,17 @@ term()
     throwError(std::string("open: ") + strerror(errno));
 #endif
 
-  int offset = lseek(fd_, 0, SEEK_SET);
+  auto offset = lseek(fd_, 0, SEEK_SET);
 
   if (offset < 0)
     throwError(std::string("lseek: ") + strerror(errno));
 
   char buffer[1025];
 
-  int num_read;
+  ssize_t num_read;
 
   while ((num_read = read(fd_, buffer, 1024)) > 0) {
-    buffer[num_read] = 0;
+    buffer[uint(num_read)] = 0;
 
     str_ += buffer;
   }

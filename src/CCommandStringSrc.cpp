@@ -72,9 +72,9 @@ process()
   int fd = pipe_->getOutput();
 
   if (fd != -1) {
-    int num_written = write(pipe_->getOutput(), str_.c_str(), str_.size());
+    auto num_written = write(pipe_->getOutput(), str_.c_str(), str_.size());
 
-    if (num_written != (int) str_.size())
+    if (num_written != int(str_.size()))
       throwError(std::string("write: ") + strerror(errno));
 
     int error1 = pipe_->closeOutput();

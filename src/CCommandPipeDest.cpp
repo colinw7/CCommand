@@ -127,7 +127,7 @@ term()
   }
 
   // restore redirected destination files (stdout and/or stderr)
-  for (int i = 0; i < (int) save_fds_.size(); i++) {
+  for (uint i = 0; i < save_fds_.size(); i++) {
     ::dup2(save_fds_[i], dest_fds_[i]);
 
     ::close(save_fds_[i]);

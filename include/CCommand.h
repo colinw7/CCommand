@@ -6,6 +6,7 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <cassert>
 
 using StringVectorT = std::vector<std::string>;
 

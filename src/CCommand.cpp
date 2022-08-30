@@ -84,7 +84,7 @@ getCommandString() const
 {
   std::string str = name_;
 
-  uint num_args = args_.size();
+  auto num_args = args_.size();
 
   for (uint i = 0; i < num_args; ++i)
     str += " " + args_[i];
@@ -417,8 +417,8 @@ void
 CCommand::
 addSignals()
 {
-  COSSignal::addSignalHandler(SIGCHLD, (COSSignal::SignalHandler) signalChild  );
-  COSSignal::addSignalHandler(SIGPIPE, (COSSignal::SignalHandler) signalGeneric);
+  COSSignal::addSignalHandler(SIGCHLD, COSSignal::SignalHandler(signalChild  ));
+  COSSignal::addSignalHandler(SIGPIPE, COSSignal::SignalHandler(signalGeneric));
 }
 
 void
@@ -445,7 +445,7 @@ resetSignals()
   COSSignal::defaultSignal(SIGTTOU );
   COSSignal::defaultSignal(SIGWINCH);
 
-  COSSignal::addSignalHandler(SIGTSTP , (COSSignal::SignalHandler) signalStop);
+  COSSignal::addSignalHandler(SIGTSTP , COSSignal::SignalHandler(signalStop));
 }
 
 void
@@ -611,18 +611,18 @@ void
 CCommand::
 run()
 {
-  int num_args = args_.size();
+  auto num_args = args_.size();
 
   char **args = new char * [num_args + 2];
 
   int i = 0;
 
-  args[i++] = (char *) name_.c_str();
+  args[i++] = const_cast<char *>(name_.c_str());
 
   StringVectorT::iterator p1, p2;
 
   for (p1 = args_.begin(), p2 = args_.end(); p1 != p2; ++p1)
-    args[i++] = (char *) (*p1).c_str();
+    args[i++] = const_cast<char *>((*p1).c_str());
 
   args[i] = nullptr;
 
