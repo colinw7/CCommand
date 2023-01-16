@@ -22,8 +22,8 @@ class CCommand {
   using DestList = std::list<CCommandDest *>;
   using Args     = StringVectorT;
 
-  typedef void  *CallbackData;
-  typedef void (*CallbackProc)(const Args &args, CallbackData data);
+  using CallbackData = void *;
+  using CallbackProc = void (*)(const Args &args, CallbackData data);
 
   enum class State {
     NONE,
@@ -35,13 +35,13 @@ class CCommand {
   };
 
  public:
-  CCommand(const std::string &cmdStr, bool do_fork=true);
+  CCommand(const std::string &cmdStr, bool doFork=true);
 
   CCommand(const std::string &name, const std::string &path,
-           const Args &args=Args(), bool do_fork=true);
+           const Args &args=Args(), bool doFork=true);
 
   CCommand(const std::string &name, CallbackProc proc, CallbackData data,
-           const Args &args=Args(), bool do_fork=false);
+           const Args &args=Args(), bool doFork=false);
 
   virtual ~CCommand();
 
@@ -51,11 +51,11 @@ class CCommand {
   uint getId() const { return id_; }
   void setId(uint id) { id_ = id; }
 
-  bool getDoFork() const { return do_fork_; }
-  void setDoFork(bool do_fork) { do_fork_ = do_fork; }
+  bool getDoFork() const { return doFork_; }
+  void setDoFork(bool doFork) { doFork_ = doFork; }
 
-  CallbackProc getCallbackProc() const { return callback_proc_; }
-  CallbackData getCallbackData() const { return callback_data_; }
+  CallbackProc getCallbackProc() const { return callbackProc_; }
+  CallbackData getCallbackData() const { return callbackData_; }
 
   const Args        &getArgs  ()      const { return args_; }
   int               getNumArgs()      const { return int(args_.size()); }
@@ -63,19 +63,22 @@ class CCommand {
 
   void addArg(const std::string &arg) { args_.push_back(arg); }
 
-  pid_t getPid () const { return pid_ ; }
+  pid_t getPid() const { return pid_ ; }
 
   bool isChild() const { return child_; }
 
   State getState() const { return state_; }
   bool  isState(State state) const { return (state_ == state); }
 
-  int getReturnCode() const { return return_code_; }
+  int getReturnCode() const { return returnCode_; }
 
-  int getSignalNum () const { return signal_num_ ; }
+  int getSignalNum() const { return signalNum_ ; }
 
   std::string getCommandString() const;
 
+  //---
+
+  // add source (file, pipe output, string)
   void addFileSrc(const std::string &filename);
   void addFileSrc(FILE *fp);
 
@@ -83,6 +86,7 @@ class CCommand {
 
   void addStringSrc(const std::string &str);
 
+  // add dest (file, pipe input, string)
   void addFileDest(const std::string &filename, int fd=1);
   void addFileDest(FILE *fp, int fd=1);
 
@@ -90,8 +94,13 @@ class CCommand {
 
   void addStringDest(std::string &str, int fd=1);
 
+  //--
+
+  // set dest overwrite/depend
   void setFileDestOverwrite(bool overwrite, int fd=1);
   void setFileDestAppend(bool append, int fd=1);
+
+  //---
 
   void start ();
   void stop  ();
@@ -137,9 +146,9 @@ class CCommand {
   void addSignals();
   void resetSignals();
 
-  void setReturnCode(int return_code) { return_code_ = return_code; }
+  void setReturnCode(int returnCode) { returnCode_ = returnCode; }
 
-  void setSignalNum(int signal_num) { signal_num_ = signal_num; }
+  void setSignalNum(int signalNum) { signalNum_ = signalNum; }
 
   void setForegroundProcessGroup();
 
@@ -152,23 +161,23 @@ class CCommand {
  private:
   std::string  name_;
   std::string  path_;
-  uint         id_            { 0 };
-  bool         do_fork_       { false };
-  CallbackProc callback_proc_ { nullptr };
-  CallbackData callback_data_ { nullptr };
+  uint         id_           { 0 };
+  bool         doFork_       { false };
+  CallbackProc callbackProc_ { nullptr };
+  CallbackData callbackData_ { nullptr };
   Args         args_;
-  pid_t        pid_           { 0 };
-  pid_t        pgid_          { 0 };
-  bool         group_leader_  { false };
-  uint         group_id_      { 0 };
-  bool         child_         { false };
+  pid_t        pid_          { 0 };
+  pid_t        pgid_         { 0 };
+  bool         groupLeader_  { false };
+  uint         groupId_      { 0 };
+  bool         child_        { false };
 
-  State        state_         { State::NONE };
-  int          return_code_   { -1 };
-  int          signal_num_    { -1 };
+  State        state_        { State::NONE };
+  int          returnCode_   { -1 };
+  int          signalNum_    { -1 };
 
-  SrcList      src_list_;
-  DestList     dest_list_;
+  SrcList      srcList_;
+  DestList     destList_;
 };
 
 #endif

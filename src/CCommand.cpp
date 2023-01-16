@@ -22,9 +22,9 @@
 #include <sys/wait.h>
 
 CCommand::
-CCommand(const std::string &cmdStr, bool do_fork) :
+CCommand(const std::string &cmdStr, bool doFork) :
  name_   (cmdStr),
- do_fork_(do_fork),
+ doFork_(doFork),
  state_  (State::IDLE)
 {
   std::vector<std::string> args;
@@ -34,10 +34,10 @@ CCommand(const std::string &cmdStr, bool do_fork) :
 
 CCommand::
 CCommand(const std::string &name, const std::string &path,
-         const std::vector<std::string> &args, bool do_fork) :
+         const std::vector<std::string> &args, bool doFork) :
  name_   (name),
  path_   (path),
- do_fork_(do_fork),
+ doFork_(doFork),
  state_  (State::IDLE)
 {
   init(args);
@@ -45,12 +45,12 @@ CCommand(const std::string &name, const std::string &path,
 
 CCommand::
 CCommand(const std::string &name, CallbackProc proc, CallbackData data,
-         const std::vector<std::string> &args, bool do_fork) :
- name_         (name),
- do_fork_      (do_fork),
- callback_proc_(proc),
- callback_data_(data),
- state_        (State::IDLE)
+         const std::vector<std::string> &args, bool doFork) :
+ name_        (name),
+ doFork_      (doFork),
+ callbackProc_(proc),
+ callbackData_(data),
+ state_       (State::IDLE)
 {
   init(args);
 }
@@ -70,10 +70,8 @@ void
 CCommand::
 init(const std::vector<std::string> &args)
 {
-  StringVectorT::const_iterator p1, p2;
-
-  for (p1 = args.begin(), p2 = args.end(); p1 != p2; ++p1)
-    args_.push_back(*p1);
+  for (const auto &arg : args)
+    args_.push_back(arg);
 
   CCommandMgrInst->addCommand(this);
 }
@@ -84,9 +82,9 @@ getCommandString() const
 {
   std::string str = name_;
 
-  auto num_args = args_.size();
+  auto numArgs = args_.size();
 
-  for (uint i = 0; i < num_args; ++i)
+  for (uint i = 0; i < numArgs; ++i)
     str += " " + args_[i];
 
   return str;
@@ -96,34 +94,34 @@ void
 CCommand::
 addFileSrc(const std::string &filename)
 {
-  CCommandFileSrc *src = new CCommandFileSrc(this, filename);
+  auto *src = new CCommandFileSrc(this, filename);
 
-  src_list_.push_back(src);
+  srcList_.push_back(src);
 }
 
 void
 CCommand::
 addFileSrc(FILE *fp)
 {
-  CCommandFileSrc *src = new CCommandFileSrc(this, fp);
+  auto *src = new CCommandFileSrc(this, fp);
 
-  src_list_.push_back(src);
+  srcList_.push_back(src);
 }
 
 void
 CCommand::
 addPipeSrc()
 {
-  CCommandPipeDest *dest = CCommandMgrInst->getPipeDest();
+  auto *dest = CCommandMgrInst->getPipeDest();
 
   if (dest == nullptr) {
     throwError("No Pipe Destination for Source");
     return;
   }
 
-  CCommandPipeSrc *src = new CCommandPipeSrc(this);
+  auto *src = new CCommandPipeSrc(this);
 
-  src_list_.push_back(src);
+  srcList_.push_back(src);
 
   src ->setDest(dest);
   dest->setSrc (src);
@@ -135,39 +133,39 @@ void
 CCommand::
 addStringSrc(const std::string &str)
 {
-  CCommandStringSrc *src = new CCommandStringSrc(this, str);
+  auto *src = new CCommandStringSrc(this, str);
 
-  src_list_.push_back(src);
+  srcList_.push_back(src);
 }
 
 void
 CCommand::
 addFileDest(const std::string &filename, int fd)
 {
-  CCommandFileDest *dest = new CCommandFileDest(this, filename, fd);
+  auto *dest = new CCommandFileDest(this, filename, fd);
 
-  dest_list_.push_back(dest);
+  destList_.push_back(dest);
 }
 
 void
 CCommand::
 addFileDest(FILE *fp, int fd)
 {
-  CCommandFileDest *dest = new CCommandFileDest(this, fp, fd);
+  auto *dest = new CCommandFileDest(this, fp, fd);
 
-  dest_list_.push_back(dest);
+  destList_.push_back(dest);
 }
 
 void
 CCommand::
 addPipeDest(int fd)
 {
-  CCommandPipeDest *dest = CCommandMgrInst->getPipeDest();
+  auto *dest = CCommandMgrInst->getPipeDest();
 
   if (dest == nullptr) {
     dest = new CCommandPipeDest(this);
 
-    dest_list_.push_back(dest);
+    destList_.push_back(dest);
 
     CCommandMgrInst->setPipeDest(dest);
   }
@@ -179,9 +177,9 @@ void
 CCommand::
 addStringDest(std::string &str, int fd)
 {
-  CCommandStringDest *dest = new CCommandStringDest(this, str, fd);
+  auto *dest = new CCommandStringDest(this, str, fd);
 
-  dest_list_.push_back(dest);
+  destList_.push_back(dest);
 }
 
 void
@@ -190,8 +188,8 @@ setFileDestOverwrite(bool overwrite, int fd)
 {
   DestList::iterator p1, p2;
 
-  for (p1 = dest_list_.begin(), p2 = dest_list_.end(); p1 != p2; ++p1) {
-    CCommandFileDest *dest = dynamic_cast<CCommandFileDest *>(*p1);
+  for (p1 = destList_.begin(), p2 = destList_.end(); p1 != p2; ++p1) {
+    auto *dest = dynamic_cast<CCommandFileDest *>(*p1);
 
     if (dest != nullptr && dest->getFd() == fd)
       dest->setOverwrite(overwrite);
@@ -204,8 +202,8 @@ setFileDestAppend(bool append, int fd)
 {
   DestList::iterator p1, p2;
 
-  for (p1 = dest_list_.begin(), p2 = dest_list_.end  (); p1 != p2; ++p1) {
-    CCommandFileDest *dest = dynamic_cast<CCommandFileDest *>(*p1);
+  for (p1 = destList_.begin(), p2 = destList_.end  (); p1 != p2; ++p1) {
+    auto *dest = dynamic_cast<CCommandFileDest *>(*p1);
 
     if (dest != nullptr && dest->getFd() == fd)
       dest->setAppend(append);
@@ -219,7 +217,7 @@ start()
   if (CCommandMgrInst->getDebug())
     CCommandUtil::outputMsg("Start command %s\n", name_.c_str());
 
-  if (do_fork_) {
+  if (doFork_) {
     initParentDests();
     initParentSrcs ();
 
@@ -244,12 +242,12 @@ start()
       initChildDests();
       initChildSrcs ();
 
-      if (callback_proc_ == nullptr)
+      if (! callbackProc_)
         run();
       else {
         setReturnCode(0);
 
-        callback_proc_(args_, callback_data_);
+        callbackProc_(args_, callbackData_);
 
         setState(State::EXITED);
       }
@@ -287,7 +285,9 @@ start()
 
     setReturnCode(0);
 
-    callback_proc_(args_, callback_data_);
+    assert(callbackProc_);
+
+    callbackProc_(args_, callbackData_);
 
     setState(State::EXITED);
 
@@ -306,9 +306,9 @@ CCommand::
 pause()
 {
   if (isState(State::RUNNING)) {
-    int error_code = COSSignal::sendSignal(pid_, SIGSTOP);
+    int errorCode = COSSignal::sendSignal(pid_, SIGSTOP);
 
-    if (error_code < 0) {
+    if (errorCode < 0) {
       throwError(std::string("kill: ") + strerror(errno) + ".");
       return;
     }
@@ -320,9 +320,9 @@ CCommand::
 resume()
 {
   if (isState(State::STOPPED)) {
-    int error_code = COSSignal::sendSignal(pid_, SIGCONT);
+    int errorCode = COSSignal::sendSignal(pid_, SIGCONT);
 
-    if (error_code < 0) {
+    if (errorCode < 0) {
       throwError(std::string("kill: ") + strerror(errno) + ".");
       return;
     }
@@ -336,9 +336,9 @@ CCommand::
 stop()
 {
   if (isState(State::RUNNING) || isState(State::STOPPED)) {
-    int error_code = COSSignal::sendSignal(pid_, SIGTERM);
+    int errorCode = COSSignal::sendSignal(pid_, SIGTERM);
 
-    if (error_code < 0) {
+    if (errorCode < 0) {
       throwError(std::string("kill: ") + strerror(errno) + ".");
       return;
     }
@@ -350,9 +350,9 @@ CCommand::
 tstop()
 {
   if (isState(State::RUNNING)) {
-    int error_code = COSSignal::sendSignal(pid_, SIGTSTP);
+    int errorCode = COSSignal::sendSignal(pid_, SIGTSTP);
 
-    if (error_code < 0) {
+    if (errorCode < 0) {
       throwError(std::string("kill: ") + strerror(errno) + ".");
       return;
     }
@@ -363,7 +363,7 @@ void
 CCommand::
 wait()
 {
-  if (! do_fork_) {
+  if (! doFork_) {
     assert(isState(State::EXITED));
   }
   else {
@@ -517,13 +517,12 @@ wait_pid(pid_t pid, bool nohang)
       return;
 
     if      (WIFEXITED(status)) {
-      int return_code = WEXITSTATUS(status);
+      int returnCode = WEXITSTATUS(status);
 
       if (CCommandMgrInst->getDebug())
-        CCommandUtil::outputMsg("Process %s Exited %d\n", command->name_.c_str(),
-                                return_code);
+        CCommandUtil::outputMsg("Process %s Exited %d\n", command->name_.c_str(), returnCode);
 
-      command->setReturnCode(return_code);
+      command->setReturnCode(returnCode);
       command->setState     (State::EXITED);
 
       command->termSrcs();
@@ -532,23 +531,23 @@ wait_pid(pid_t pid, bool nohang)
       command->died();
     }
     else if (WIFSTOPPED(status)) {
-      int signal_num = WSTOPSIG(status);
+      int signalNum = WSTOPSIG(status);
 
       if (CCommandMgrInst->getDebug())
         CCommandUtil::outputMsg("Process %s Stopped '%s'(%d)\n", command->name_.c_str(),
-                                COSSignal::strsignal(signal_num).c_str(), signal_num);
+                                COSSignal::strsignal(signalNum).c_str(), signalNum);
 
-      command->setSignalNum(signal_num);
+      command->setSignalNum(signalNum);
       command->setState    (State::STOPPED);
     }
     else if (WIFSIGNALED(status)) {
-      int signal_num = WTERMSIG(status);
+      int signalNum = WTERMSIG(status);
 
       if (CCommandMgrInst->getDebug())
         CCommandUtil::outputMsg("Process %s Signalled '%s'(%d)\n", command->name_.c_str(),
-                                COSSignal::strsignal(signal_num).c_str(), signal_num);
+                                COSSignal::strsignal(signalNum).c_str(), signalNum);
 
-      command->setSignalNum(signal_num);
+      command->setSignalNum(signalNum);
       command->setState    (State::SIGNALLED);
     }
 #ifdef WIFCONTINUED
@@ -566,9 +565,9 @@ wait_pid(pid_t pid, bool nohang)
         if (CCommandMgrInst->getDebug())
           CCommandUtil::outputMsg("Process %s Does Not Exist\n", command->name_.c_str());
 
-        int return_code = -1;
+        int returnCode = -1;
 
-        command->setReturnCode(return_code);
+        command->setReturnCode(returnCode);
         command->setState     (State::EXITED);
 
         command->termSrcs();
@@ -611,9 +610,9 @@ void
 CCommand::
 run()
 {
-  auto num_args = args_.size();
+  auto numArgs = args_.size();
 
-  char **args = new char * [num_args + 2];
+  auto **args = new char * [numArgs + 2];
 
   int i = 0;
 
@@ -645,7 +644,7 @@ initParentSrcs()
 {
   SrcList::iterator p1, p2;
 
-  for (p1 = src_list_.begin(), p2 = src_list_.end(); p1 != p2; ++p1)
+  for (p1 = srcList_.begin(), p2 = srcList_.end(); p1 != p2; ++p1)
     (*p1)->initParent();
 }
 
@@ -655,7 +654,7 @@ initParentDests()
 {
   DestList::iterator p1, p2;
 
-  for (p1 = dest_list_.begin(), p2 = dest_list_.end(); p1 != p2; ++p1)
+  for (p1 = destList_.begin(), p2 = destList_.end(); p1 != p2; ++p1)
     (*p1)->initParent();
 }
 
@@ -665,7 +664,7 @@ initChildSrcs()
 {
   SrcList::iterator p1, p2;
 
-  for (p1 = src_list_.begin(), p2 = src_list_.end(); p1 != p2; ++p1)
+  for (p1 = srcList_.begin(), p2 = srcList_.end(); p1 != p2; ++p1)
     (*p1)->initChild();
 }
 
@@ -675,7 +674,7 @@ initChildDests()
 {
   DestList::iterator p1, p2;
 
-  for (p1 = dest_list_.begin(), p2 = dest_list_.end(); p1 != p2; ++p1)
+  for (p1 = destList_.begin(), p2 = destList_.end(); p1 != p2; ++p1)
     (*p1)->initChild();
 }
 
@@ -685,7 +684,7 @@ processSrcs()
 {
   SrcList::iterator p1, p2;
 
-  for (p1 = src_list_.begin(), p2 = src_list_.end(); p1 != p2; ++p1)
+  for (p1 = srcList_.begin(), p2 = srcList_.end(); p1 != p2; ++p1)
     (*p1)->process();
 }
 
@@ -695,7 +694,7 @@ processDests()
 {
   DestList::iterator p1, p2;
 
-  for (p1 = dest_list_.begin(), p2 = dest_list_.end(); p1 != p2; ++p1)
+  for (p1 = destList_.begin(), p2 = destList_.end(); p1 != p2; ++p1)
     (*p1)->process();
 }
 
@@ -705,7 +704,7 @@ termSrcs()
 {
   SrcList::iterator p1, p2;
 
-  for (p1 = src_list_.begin(), p2 = src_list_.end(); p1 != p2; ++p1)
+  for (p1 = srcList_.begin(), p2 = srcList_.end(); p1 != p2; ++p1)
     (*p1)->term();
 }
 
@@ -715,7 +714,7 @@ termDests()
 {
   DestList::iterator p1, p2;
 
-  for (p1 = dest_list_.begin(), p2 = dest_list_.end(); p1 != p2; ++p1)
+  for (p1 = destList_.begin(), p2 = destList_.end(); p1 != p2; ++p1)
     (*p1)->term();
 }
 
@@ -723,18 +722,18 @@ void
 CCommand::
 deleteSrcs()
 {
-  std::for_each(src_list_.begin(), src_list_.end(), CDeletePointer());
+  std::for_each(srcList_.begin(), srcList_.end(), CDeletePointer());
 
-  src_list_.clear();
+  srcList_.clear();
 }
 
 void
 CCommand::
 deleteDests()
 {
-  std::for_each(dest_list_.begin(), dest_list_.end(), CDeletePointer());
+  std::for_each(destList_.begin(), destList_.end(), CDeletePointer());
 
-  dest_list_.clear();
+  destList_.clear();
 }
 
 void
@@ -767,8 +766,8 @@ void
 CCommand::
 setProcessGroupLeader()
 {
-  group_leader_ = true;
-  group_id_     = 0;
+  groupLeader_ = true;
+  groupId_     = 0;
 
   pgid_ = pid_;
 
@@ -778,13 +777,13 @@ setProcessGroupLeader()
 
 void
 CCommand::
-setProcessGroup(CCommand *group_command)
+setProcessGroup(CCommand *groupCommand)
 {
-  group_leader_ = false;
-  group_id_     = group_command->getId();
+  groupLeader_ = false;
+  groupId_     = groupCommand->getId();
 
-  if (group_command->pid_ != 0)
-    pgid_ = group_command->pid_;
+  if (groupCommand->pid_ != 0)
+    pgid_ = groupCommand->pid_;
 
   if (! pid_ && ! pgid_)
     COSProcess::setProcessGroupId(pid_, pgid_);
@@ -796,17 +795,17 @@ updateProcessGroup()
 {
   assert(pid_);
 
-  if      (group_leader_) {
+  if      (groupLeader_) {
     pgid_ = pid_;
 
     COSProcess::setProcessGroupId(pid_);
   }
-  else if (group_id_) {
-    CCommand *group_command = CCommandMgrInst->getCommand(group_id_);
+  else if (groupId_) {
+    auto *groupCommand = CCommandMgrInst->getCommand(groupId_);
 
-    if (! group_command) return;
+    if (! groupCommand) return;
 
-    pgid_ = group_command->pid_;
+    pgid_ = groupCommand->pid_;
 
     COSProcess::setProcessGroupId(pid_, pgid_);
   }

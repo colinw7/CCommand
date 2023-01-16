@@ -12,8 +12,8 @@ class CCommandPipeDest;
 
 class CCommandMgr : public CSingleton<CCommandMgr> {
  public:
-  typedef std::map<uint,CCommand *> CommandMap;
-  typedef std::list<CCommand *>     CommandList;
+  typedef std::map<uint, CCommand *> CommandMap;
+  typedef std::list<CCommand *>      CommandList;
 
  public:
   CCommandMgr();
