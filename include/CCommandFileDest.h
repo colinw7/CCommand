@@ -15,9 +15,9 @@ class CCommandFileDest : public CCommandDest {
   void setOverwrite(bool overwrite) { overwrite_ = overwrite; }
   void setAppend(bool append) { append_ = append; }
 
-  void initParent();
-  void initChild();
-  void term();
+  void initParent() override;
+  void initChild() override;
+  void term() override;
 
  private:
   std::string *file_      { nullptr };

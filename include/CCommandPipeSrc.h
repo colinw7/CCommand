@@ -16,9 +16,9 @@ class CCommandPipeSrc : public CCommandSrc {
 
   void setPipe(CCommandPipe *pipe);
 
-  void initParent();
-  void initChild();
-  void term();
+  void initParent() override;
+  void initChild() override;
+  void term() override;
 
   CCommandPipe *getPipe() const { return pipe_; }
 

@@ -11,11 +11,11 @@ class CCommandStringSrc : public CCommandSrc {
 
  ~CCommandStringSrc();
 
-  void initParent();
-  void initChild();
-  void term();
+  void initParent() override;
+  void initChild() override;
+  void term() override;
 
-  void process();
+  void process() override;
 
   CCommandPipe *getPipe() const { return pipe_; }
 

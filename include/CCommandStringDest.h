@@ -11,11 +11,11 @@ class CCommandStringDest : public CCommandDest {
 
  ~CCommandStringDest();
 
-  void initParent();
-  void initChild();
-  void term();
+  void initParent() override;
+  void initChild() override;
+  void term() override;
 
-  void process();
+  void process() override;
 
   CCommandPipe *getPipe() const { return pipe_; }
   int           getFd  () const { return dest_fd_; }
